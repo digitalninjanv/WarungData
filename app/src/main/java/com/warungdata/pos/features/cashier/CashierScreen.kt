@@ -57,16 +57,18 @@ fun CashierScreen(
         )
 
         // Search
-        OutlinedTextField(
-            value = state.searchQuery,
-            onValueChange = viewModel::search,
+        androidx.compose.material3.SearchBar(
+            query = state.searchQuery,
+            onQueryChange = viewModel::search,
+            onSearch = {},
+            active = false,
+            onActiveChange = {},
             placeholder = { Text("Cari produk...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+        ) {}
 
         // Main content: products grid + cart side by side (or stacked)
         Row(modifier = Modifier.weight(1f)) {
@@ -94,12 +96,12 @@ fun CashierScreen(
             }
 
             // Cart panel (right)
-            Surface(
+            ElevatedCard(
                 modifier = Modifier
                     .weight(0.4f)
-                    .fillMaxHeight(),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(topStart = 16.dp)
+                    .fillMaxHeight()
+                    .padding(end = 16.dp, bottom = 16.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize()
@@ -161,9 +163,10 @@ fun CashierScreen(
                             OutlinedTextField(
                                 value = if (state.discount > 0) state.discount.toString() else "",
                                 onValueChange = { viewModel.updateDiscount(it.toLongOrNull() ?: 0) },
-                                modifier = Modifier.width(100.dp),
+                                modifier = Modifier.width(120.dp),
                                 singleLine = true,
-                                placeholder = { Text("0") }
+                                placeholder = { Text("Nominal (Rp)") },
+                                textStyle = androidx.compose.ui.text.TextStyle(textAlign = androidx.compose.ui.text.style.TextAlign.End)
                             )
                         }
                         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
