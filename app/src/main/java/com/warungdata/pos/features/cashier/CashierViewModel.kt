@@ -28,7 +28,8 @@ data class CashierUiState(
     val showPaymentDialog: Boolean = false,
     val showSuccess: Boolean = false,
     val isLoading: Boolean = true,
-    val invoiceNumber: String = ""
+    val invoiceNumber: String = "",
+    val error: String? = null
 )
 
 class CashierViewModel(application: Application) : AndroidViewModel(application) {
@@ -112,6 +113,12 @@ class CashierViewModel(application: Application) : AndroidViewModel(application)
         val state = _uiState.value
         if (state.cart.isEmpty()) return
 
+        val invalidItem = state.cart.find { it.qty > it.product.stock }
+        if (invalidItem != null) {
+            _uiState.value = state.copy(error = "Stok tidak mencukupi untuk: ${invalidItem.product.name}")
+            return
+        }
+
         viewModelScope.launch {
             val lastId = saleDao.getLastSaleId()
             val invoiceNumber = generateInvoice(lastId + 1)
@@ -158,9 +165,14 @@ class CashierViewModel(application: Application) : AndroidViewModel(application)
                 total = 0,
                 showPaymentDialog = false,
                 showSuccess = true,
-                invoiceNumber = invoiceNumber
+                invoiceNumber = invoiceNumber,
+                error = null
             )
         }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 
     fun dismissSuccess() {

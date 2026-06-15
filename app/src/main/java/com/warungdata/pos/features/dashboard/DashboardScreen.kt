@@ -23,6 +23,9 @@ fun DashboardScreen(
     onSettings: () -> Unit = {},
     onExport: () -> Unit = {},
     onBackup: () -> Unit = {},
+    onCategories: () -> Unit = {},
+    onTransactions: () -> Unit = {},
+    onCashSession: () -> Unit = {},
     viewModel: DashboardViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -126,7 +129,47 @@ fun DashboardScreen(
                     )
                 }
 
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = onCategories,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                    ) {
+                        Text("Kategori")
+                    }
+                    Button(
+                        onClick = onTransactions,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                    ) {
+                        Text("Riwayat")
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = onCashSession,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                    ) {
+                        Text("Shift Kasir")
+                    }
+                    Button(
+                        onClick = onSettings,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                    ) {
+                        Text("Pengaturan")
+                    }
+                }
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
                 Text(
                     text = "Informasi Lainnya",
                     style = MaterialTheme.typography.titleMedium
