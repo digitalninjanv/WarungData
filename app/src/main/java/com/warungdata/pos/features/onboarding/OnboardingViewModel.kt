@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+private const val MAX_PIN_LENGTH = 6
+
 data class OnboardingUiState(
     val storeName: String = "",
     val ownerName: String = "",
@@ -41,15 +43,24 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun updatePin(value: String) {
-        _uiState.value = _uiState.value.copy(pin = value, error = null)
+        _uiState.value = _uiState.value.copy(
+            pin = value.onlyDigits().take(MAX_PIN_LENGTH),
+            error = null
+        )
     }
 
     fun updatePinConfirm(value: String) {
-        _uiState.value = _uiState.value.copy(pinConfirm = value, error = null)
+        _uiState.value = _uiState.value.copy(
+            pinConfirm = value.onlyDigits().take(MAX_PIN_LENGTH),
+            error = null
+        )
     }
 
     fun save() {
         val state = _uiState.value
+        val pin = state.pin.onlyDigits()
+        val pinConfirm = state.pinConfirm.onlyDigits()
+
         if (state.storeName.isBlank()) {
             _uiState.value = state.copy(error = "Nama toko harus diisi")
             return
@@ -58,22 +69,24 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
             _uiState.value = state.copy(error = "Nama pemilik harus diisi")
             return
         }
-        if (state.pin.length < 4) {
-            _uiState.value = state.copy(error = "PIN minimal 4 digit")
+        if (pin.length !in 4..6) {
+            _uiState.value = state.copy(error = "PIN harus 4-6 digit angka")
             return
         }
-        if (state.pin != state.pinConfirm) {
+        if (pin != pinConfirm) {
             _uiState.value = state.copy(error = "PIN tidak cocok")
             return
         }
 
-        _uiState.value = state.copy(isSaving = true)
+        _uiState.value = state.copy(isSaving = true, error = null)
 
         viewModelScope.launch {
             settingsRepo.saveStoreInfo(state.storeName, state.ownerName, state.businessType)
-            settingsRepo.setPinHash(state.pin)
+            settingsRepo.setPin(pin)
             settingsRepo.setOnboardingCompleted()
             _onboardingComplete.value = true
         }
     }
+
+    private fun String.onlyDigits(): String = filter { it.isDigit() }
 }
