@@ -13,7 +13,9 @@ data class PinUiState(
     val enteredPin: String = "",
     val error: String? = null,
     val isVerified: Boolean = false,
-    val isNewUser: Boolean = false
+    val isNewUser: Boolean = false,
+    val isLoading: Boolean = true,
+    val targetPinLength: Int = 4
 )
 
 class PinViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,17 +27,26 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
     init {
         viewModelScope.launch {
             val hasOnboarded = settingsRepo.isOnboardingCompleted()
-            _uiState.value = _uiState.value.copy(isNewUser = !hasOnboarded)
+            val pinLength = settingsRepo.getPinLength().coerceIn(4, 6)
+            _uiState.value = _uiState.value.copy(
+                isNewUser = !hasOnboarded,
+                isLoading = false,
+                targetPinLength = pinLength
+            )
         }
     }
 
     fun enterDigit(digit: String) {
-        val current = _uiState.value.enteredPin
-        if (current.length >= 6) return
-        val newPin = current + digit
-        _uiState.value = _uiState.value.copy(enteredPin = newPin, error = null)
+        if (digit.length != 1 || !digit[0].isDigit()) return
 
-        if (newPin.length >= 4) {
+        val state = _uiState.value
+        val current = state.enteredPin
+        if (current.length >= state.targetPinLength) return
+
+        val newPin = current + digit
+        _uiState.value = state.copy(enteredPin = newPin, error = null)
+
+        if (newPin.length == state.targetPinLength) {
             verifyPin(newPin)
         }
     }
