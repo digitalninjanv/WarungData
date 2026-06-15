@@ -23,15 +23,40 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Find Gradle wrapper
+        id: gradle
+        shell: bash
+        run: |
+          GRADLEW_PATH="$(find . -maxdepth 4 -type f -name gradlew | head -n 1)"
+
+          if [ -z "$GRADLEW_PATH" ]; then
+            echo "ERROR: gradlew tidak ditemukan."
+            echo "Solusi: generate Gradle Wrapper di root project Android, lalu commit file gradlew, gradlew.bat, dan folder gradle/wrapper/."
+            exit 1
+          fi
+
+          PROJECT_DIR="$(dirname "$GRADLEW_PATH")"
+          echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
+          echo "Gradle wrapper ditemukan di: $GRADLEW_PATH"
+
+      - name: Make Gradle wrapper executable
+        shell: bash
+        run: chmod +x "${{ steps.gradle.outputs.project_dir }}/gradlew"
+
       - name: Accept Android SDK licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        shell: bash
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
       - name: Build Debug APK
-        run: ./gradlew clean assembleDebug
+        shell: bash
+        working-directory: ${{ steps.gradle.outputs.project_dir }}
+        run: ./gradlew clean assembleDebug --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: WarungDataPOS-Debug
-          path: app/build/outputs/apk/debug/*.apk
-
+          path: |
+            **/build/outputs/apk/debug/*.apk
+            **/outputs/apk/debug/*.apk
+          if-no-files-found: error
