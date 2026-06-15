@@ -7,6 +7,7 @@ object SettingsKeys {
     const val CURRENCY = "currency"
     const val HAS_COMPLETED_ONBOARDING = "has_completed_onboarding"
     const val PIN_HASH = "pin_hash"
+    const val PIN_LENGTH = "pin_length"
     const val IS_PIN_ENABLED = "is_pin_enabled"
     const val THEME_MODE = "theme_mode"
     const val PRINTER_ENABLED = "printer_enabled"
