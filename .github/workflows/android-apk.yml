@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,26 +25,39 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
 
-      - name: Find Gradle wrapper
-        id: gradle
+      - name: Detect Android project and Gradle command
+        id: project
         shell: bash
         run: |
-          GRADLEW_PATH="$(find . -maxdepth 4 -type f -name gradlew | head -n 1)"
+          set -euo pipefail
 
-          if [ -z "$GRADLEW_PATH" ]; then
-            echo "ERROR: gradlew tidak ditemukan."
-            echo "Solusi: generate Gradle Wrapper di root project Android, lalu commit file gradlew, gradlew.bat, dan folder gradle/wrapper/."
-            exit 1
+          GRADLEW_PATH="$(find . -maxdepth 4 -type f -name gradlew | head -n 1 || true)"
+
+          if [ -n "$GRADLEW_PATH" ]; then
+            PROJECT_DIR="$(dirname "$GRADLEW_PATH")"
+            chmod +x "$GRADLEW_PATH"
+            GRADLE_COMMAND="./gradlew"
+            echo "Gradle wrapper ditemukan di: $GRADLEW_PATH"
+          else
+            SETTINGS_PATH="$(find . -maxdepth 4 \( -name settings.gradle -o -name settings.gradle.kts \) | head -n 1 || true)"
+
+            if [ -z "$SETTINGS_PATH" ]; then
+              echo "ERROR: settings.gradle/settings.gradle.kts tidak ditemukan."
+              echo "Pastikan repository berisi project Android yang valid."
+              exit 1
+            fi
+
+            PROJECT_DIR="$(dirname "$SETTINGS_PATH")"
+            GRADLE_COMMAND="gradle"
+            echo "gradlew tidak ditemukan. Menggunakan Gradle dari GitHub Actions."
+            echo "Android project ditemukan di: $PROJECT_DIR"
           fi
 
-          PROJECT_DIR="$(dirname "$GRADLEW_PATH")"
           echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
-          echo "Gradle wrapper ditemukan di: $GRADLEW_PATH"
-
-      - name: Make Gradle wrapper executable
-        shell: bash
-        run: chmod +x "${{ steps.gradle.outputs.project_dir }}/gradlew"
+          echo "gradle_command=$GRADLE_COMMAND" >> "$GITHUB_OUTPUT"
 
       - name: Accept Android SDK licenses
         shell: bash
@@ -49,8 +65,8 @@ jobs:
 
       - name: Build Debug APK
         shell: bash
-        working-directory: ${{ steps.gradle.outputs.project_dir }}
-        run: ./gradlew clean assembleDebug --stacktrace
+        working-directory: ${{ steps.project.outputs.project_dir }}
+        run: ${{ steps.project.outputs.gradle_command }} clean assembleDebug --stacktrace --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
