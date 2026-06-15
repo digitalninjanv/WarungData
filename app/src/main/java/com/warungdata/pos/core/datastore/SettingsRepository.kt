@@ -82,9 +82,10 @@ class SettingsRepository(private val context: Context) {
         }
 
         context.dataStore.edit { prefs ->
+            val savedLength = prefs[PrefKeys.PIN_LENGTH]
             prefs[PrefKeys.PIN_HASH] = hash
             prefs[PrefKeys.IS_PIN_ENABLED] = hash.isNotEmpty()
-            if (prefs[PrefKeys.PIN_LENGTH] !in 4..6) {
+            if (savedLength == null || savedLength !in 4..6) {
                 prefs[PrefKeys.PIN_LENGTH] = 4
             }
         }
