@@ -205,6 +205,20 @@ fun CashierScreen(
             selectedMethod = state.paymentMethod
         )
     }
+
+    // Error dialog
+    if (state.error != null) {
+        AlertDialog(
+            onDismissRequest = viewModel::clearError,
+            title = { Text("Peringatan") },
+            text = { Text(state.error!!) },
+            confirmButton = {
+                TextButton(onClick = viewModel::clearError) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

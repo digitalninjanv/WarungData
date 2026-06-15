@@ -30,6 +30,9 @@ import com.warungdata.pos.features.customers.CustomersScreen
 import com.warungdata.pos.features.dashboard.DashboardScreen
 import com.warungdata.pos.features.debts.DebtScreen
 import com.warungdata.pos.features.expenses.ExpenseScreen
+import com.warungdata.pos.features.categories.CategoryScreen
+import com.warungdata.pos.features.cash_session.CashSessionScreen
+import com.warungdata.pos.features.transactions.TransactionHistoryScreen
 import com.warungdata.pos.features.backup.BackupScreen
 import com.warungdata.pos.features.export_features.ExportScreen
 import com.warungdata.pos.features.products.ProductsScreen
@@ -174,7 +177,10 @@ fun MainScaffold() {
                 DashboardScreen(
                     onSettings = { innerNavController.navigate("settings") },
                     onExport = { innerNavController.navigate("export") },
-                    onBackup = { innerNavController.navigate("backup") }
+                    onBackup = { innerNavController.navigate("backup") },
+                    onCategories = { innerNavController.navigate("categories") },
+                    onTransactions = { innerNavController.navigate("transactions") },
+                    onCashSession = { innerNavController.navigate("cash_session") }
                 )
             }
             composable("cashier") { CashierScreen() }
@@ -190,6 +196,15 @@ fun MainScaffold() {
             }
             composable("backup") {
                 BackupScreen(onBack = { innerNavController.popBackStack() })
+            }
+            composable("categories") {
+                CategoryScreen(onBack = { innerNavController.popBackStack() })
+            }
+            composable("cash_session") {
+                CashSessionScreen(onBack = { innerNavController.popBackStack() })
+            }
+            composable("transactions") {
+                TransactionHistoryScreen(onBack = { innerNavController.popBackStack() })
             }
         }
     }

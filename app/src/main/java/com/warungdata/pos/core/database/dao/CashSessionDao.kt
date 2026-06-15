@@ -9,11 +9,8 @@ interface CashSessionDao {
     @Query("SELECT * FROM cash_sessions ORDER BY date DESC")
     fun getAllSessions(): Flow<List<CashSessionEntity>>
 
-    @Query("SELECT * FROM cash_sessions WHERE date = :date AND status = 'open' LIMIT 1")
-    suspend fun getOpenSessionByDate(date: String): CashSessionEntity?
-
-    @Query("SELECT * FROM cash_sessions WHERE id = :id")
-    suspend fun getSessionById(id: Int): CashSessionEntity?
+    @Query("SELECT * FROM cash_sessions WHERE date = :date LIMIT 1")
+    suspend fun getSessionByDateOnce(date: String): CashSessionEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: CashSessionEntity): Long
