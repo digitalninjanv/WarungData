@@ -2,6 +2,7 @@ package com.warungdata.pos.core.printer
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.warungdata.pos.core.database.AppDatabase
@@ -27,7 +28,8 @@ class PrinterService(private val context: Context) {
 
             val text = buildStrukText(sale, items, if (store.isBlank()) null else store)
 
-            val adapter = BluetoothAdapter.getDefaultAdapter()
+            val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val adapter = bluetoothManager.adapter
                 ?: return@withContext Result.failure(Exception("Bluetooth tidak tersedia"))
 
             val device = adapter.getRemoteDevice(address)
