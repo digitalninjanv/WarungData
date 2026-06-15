@@ -30,6 +30,16 @@ fun PinScreen(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Surface
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -52,12 +62,11 @@ fun PinScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // PIN dots display
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                repeat(6) { index ->
+                repeat(state.targetPinLength) { index ->
                     val filled = index < state.enteredPin.length
                     Surface(
                         modifier = Modifier.size(20.dp),
@@ -79,7 +88,6 @@ fun PinScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Numeric keypad
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 for (row in listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"))) {
                     Row(
